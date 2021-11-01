@@ -128,7 +128,10 @@ class TensorflowBackend(Backend):
 
     module = BackendTFModule(handlers, opset, strict, graph_def, cls)
     signatures = dict()
-    tf_rep_graph = tf.Graph()
+    if training_mode:
+      tf_rep_graph = kwargs['graph'] if 'graph' in kwargs else tf.Graph()
+    else:
+      tf_rep_graph = tf.Graph()
     with tf_rep_graph.as_default():
       for value_info in graph_def.input:
         if value_info.name in initialized or not value_info.type.HasField(
@@ -237,7 +240,10 @@ class TensorflowBackend(Backend):
     node = OnnxNode(node)
     input_tensors = []
     for i in inputs:
-      input_tensors.append(tf.constant(i))
+      if i is None:
+        input_tensors.append(i)
+      else:
+        input_tensors.append(tf.constant(i))
 
     if isinstance(inputs, dict):
       feed_dict_raw = inputs
@@ -249,7 +255,15 @@ class TensorflowBackend(Backend):
     input_dict = {}
     for k, v in feed_dict_raw.items():
       if isinstance(v, list):
-        input_dict[k] = [tf.constant(x) for x in v]
+        list_input = []
+        for x in v:
+          if x is None:
+            list_input.append(x)
+          else:
+            list_input.append(tf.constant(x))
+        input_dict[k] = list_input
+      elif v is None:  # keep None for empty optional data
+        input_dict[k] = v
       else:
         input_dict[k] = tf.constant(v)
 
