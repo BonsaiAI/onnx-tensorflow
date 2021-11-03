@@ -17,7 +17,7 @@ else:
   with open(os.path.join(TOP_DIR, 'ONNX_VERSION_NUMBER')) as onnx_version_file:
     onnx_version = onnx_version_file.read().strip()
     # see if our build process has added a suffix to the version
-    n_dots = [i for i, letter in enumerate(s) if letter == "."]
+    n_dots = [i for i, ch in enumerate(onnx_version) if ch == "."]
 
     # get the ONNX version from the upstream repo
     # by removing the suffix appended by the Fork build process
