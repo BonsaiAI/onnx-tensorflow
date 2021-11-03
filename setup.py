@@ -16,8 +16,15 @@ else:
   # For user, we install the onnx release known to work with our release.
   with open(os.path.join(TOP_DIR, 'ONNX_VERSION_NUMBER')) as onnx_version_file:
     onnx_version = onnx_version_file.read().strip()
-    onnx_dep = "onnx>=" + onnx_version
+    # see if our build process has added a suffix to the version
+    n_dots = [i for i, ch in enumerate(onnx_version) if ch == "."]
 
+    # get the ONNX version from the upstream repo
+    # by removing the suffix appended by the Fork build process
+    if len(n_dots) == 3:
+        onnx_version = onnx_version[0:n_dots[-1]]
+
+    onnx_dep = "onnx==" + onnx_version
 try:
   git_version = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                         cwd=TOP_DIR).decode('ascii').strip()
